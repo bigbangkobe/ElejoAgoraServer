@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 
 // 捕获其他异常
 app.use((err, req, res, next) => {
-  logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
+  // logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
   console.log(`Error: ${err.message}\nStack: ${err.stack}`);
   res.status(500).json({ error: 'Internal Server Error' });
 });
@@ -47,14 +47,14 @@ app.listen(PORT, () => {
 
 // 捕获未处理的 Promise 拒绝
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+  // logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
   console.log(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
   // 上报到邮箱或其他服务
 });
 
 // 捕获未捕获的异常
 process.on('uncaughtException', (err) => {
-  logger.error(`Uncaught Exception: ${err.message}\n${err.stack}`);
+  // logger.error(`Uncaught Exception: ${err.message}\n${err.stack}`);
   console.log(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
   // 上报到邮箱或其他服务
   process.exit(1);  // 可选：退出进程，防止应用在崩溃后继续运行
