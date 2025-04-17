@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
+const tokenRoutes = require('./routes/tokenRoutes');
 
 // 日志目录
 const logDir = path.join(__dirname, 'logs');
