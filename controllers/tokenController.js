@@ -1,4 +1,21 @@
 const agoraService = require('../services/agoraService');
+const zegoService = require('../services/zegoService');
+
+// 从云端获得zego token
+const getZegoToken = (req, res) => {
+  const { appId, userId, secret, effectiveTimeInSeconds, payload } = req.body;
+
+  if (!appId || !userId || !secret || !effectiveTimeInSeconds || !payload) {
+    return res.status(400).json({ error: 'params are is null' });
+  }
+
+  try {
+    const token = zegoService.generateToken04(appId, userId, secret, effectiveTimeInSeconds, payload);
+    return res.status(200).json({ token });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to zego generate token' });
+  }
+};
 
 // 获取云端生成的 Token
 const getToken = (req, res) => {
@@ -35,4 +52,5 @@ const validateToken = (req, res) => {
 module.exports = {
   getToken,
   validateToken,
+  getZegoToken,
 };

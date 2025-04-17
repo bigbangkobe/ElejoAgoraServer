@@ -8,7 +8,7 @@ const generateToken = (uid, channelName) => {
   if (!uid || !channelName) {
     throw new Error('UID and channelName are required');
   }
-
+  console.log("appId:" + appId + ",appCertificate:" + appCertificate);
   // 生成 RTC 令牌
   try {
     const token = agora.RtcTokenBuilder.buildTokenWithUid(
