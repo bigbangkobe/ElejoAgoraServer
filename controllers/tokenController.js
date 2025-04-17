@@ -16,7 +16,7 @@ const getZegoToken = (req, res) => {
     console.log("token :", token);  // 打印请求体，查看其内容
     return res.status(200).json({ token });
   } catch (err) {
-    console.log("Failed to zego generate token");  // 打印请求体，查看其内容
+    console.log("Failed to zego generate token:", err);  // 打印请求体，查看其内容
     return res.status(500).json({ error: 'Failed to zego generate token' });
   }
 };
