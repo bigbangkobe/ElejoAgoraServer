@@ -3,6 +3,7 @@ const zegoService = require('../services/zegoService');
 
 // 从云端获得zego token
 const getZegoToken = (req, res) => {
+  console.log("Request Body:", req.body);  // 打印请求体，查看其内容
   const { appId, userId, secret, effectiveTimeInSeconds, payload } = req.body;
 
   if (!appId || !userId || !secret || !effectiveTimeInSeconds || !payload) {
