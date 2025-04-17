@@ -8,7 +8,11 @@ const tokenRoutes = require('./routes/tokenRoutes');
 const logger = require('./logger/logger'); // 引入日志记录器
 
 // 服务器配置
-app.use(cors());  // 跨域请求
+app.use(cors({
+    origin : '*',  // 或者 '*' 来允许所有源
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));  // 跨域请求
 app.use(bodyParser.json());  // 解析 JSON 请求体
 
 // 路由配置
