@@ -5,15 +5,18 @@ const zegoService = require('../services/zegoService');
 const getZegoToken = (req, res) => {
   console.log("Request Body:", req.body);  // 打印请求体，查看其内容
   const { appId, userId, secret, effectiveTimeInSeconds, payload } = req.body;
-
+  console.log("aaaa Request Body:", req.body);  // 打印请求体，查看其内容
   if (!appId || !userId || !secret || !effectiveTimeInSeconds || !payload) {
+    console.log("params are is null");  // 打印请求体，查看其内容
     return res.status(400).json({ error: 'params are is null' });
   }
 
   try {
     const token = zegoService.generateToken04(appId, userId, secret, effectiveTimeInSeconds, payload);
+    console.log("token :", token);  // 打印请求体，查看其内容
     return res.status(200).json({ token });
   } catch (err) {
+    console.log("Failed to zego generate token");  // 打印请求体，查看其内容
     return res.status(500).json({ error: 'Failed to zego generate token' });
   }
 };
