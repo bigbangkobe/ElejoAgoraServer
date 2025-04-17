@@ -31,6 +31,7 @@ app.use('/api/token', tokenRoutes);
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Route not found' });
 });
+app.use(express.json());  // 确保启用这个中间件，解析请求体中的 JSON 数据
 
 // 捕获其他异常
 app.use((err, req, res, next) => {
