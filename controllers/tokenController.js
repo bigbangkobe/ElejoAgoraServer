@@ -6,7 +6,7 @@ const getZegoToken = (req, res) => {
   console.log("Request Body:", req.body);  // 打印请求体，查看其内容
   const { appId, userId, secret, effectiveTimeInSeconds, payload } = req.body;
   console.log("aaaa Request Body:", req.body);  // 打印请求体，查看其内容
-  if (!appId || !userId || !secret || !effectiveTimeInSeconds || !payload) {
+  if (!appId || !userId || !secret || !effectiveTimeInSeconds) {
     console.log("params are is null");  // 打印请求体，查看其内容
     return res.status(400).json({ error: 'params are is null' });
   }
