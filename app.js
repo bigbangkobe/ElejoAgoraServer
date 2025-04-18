@@ -1,6 +1,6 @@
 require('dotenv').config();  // 加载 .env 文件
 const express = require('express');
-const app = express();
+const https = require('https');
 const helmet = require('helmet');
 const winston = require('winston');
 const path = require('path');
@@ -28,6 +28,16 @@ const logger = winston.createLogger({
     }),
   ],
 });
+
+// 读取证书和私钥
+const privateKey = fs.readFileSync('naturich.top.key', 'utf8');
+const certificate = fs.readFileSync('naturich.top.pem', 'utf8');
+
+// 配置 HTTPS 选项
+const credentials = { key: privateKey, cert: certificate };
+
+// 创建 Express 应用
+const app = express();
 
 // 服务器配置
 app.use(helmet({
@@ -61,10 +71,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// 启动服务器
+// 启动 HTTPS 服务器
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+https.createServer(credentials, app).listen(PORT, () => {
+  console.log(`HTTPS Server is running on https://localhost:${PORT}`);
 });
 
 // 捕获未处理的 Promise 拒绝
