@@ -1,5 +1,6 @@
 const agoraService = require('../services/agoraService');
 const zegoService = require('../services/zegoService');
+const xunfeiService = require('../services/xunfeiService');
 
 // 从云端获得zego token
 const getZegoToken = (req, res) => {
@@ -53,8 +54,24 @@ const validateToken = (req, res) => {
   }
 };
 
+// 讯飞翻译接口
+async function translate(req, res, next) {
+  const { text, from, to } = req.body;
+  if (!text || !from || !to) {
+    return res.status(400).json({ error: '参数 text, from, to 必填' });
+  }
+
+  try {
+    const translated = await xunfeiService.translate(text, from, to);
+    res.json({ translated });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getToken,
   validateToken,
   getZegoToken,
+  translate,
 };

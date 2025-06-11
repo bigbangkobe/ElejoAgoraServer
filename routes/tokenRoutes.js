@@ -10,4 +10,7 @@ router.post('/zegoGenerateToken', tokenController.getZegoToken);
 // 验证 Token
 router.post('/validate', tokenController.validateToken);
 
+//调用讯飞翻译接口
+router.post('/xunfeiTranslate', tokenController.translate);
+
 module.exports = router;
