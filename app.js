@@ -6,7 +6,15 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
 const tokenRoutes = require('./routes/tokenRoutes');
+const cors = require('cors');
 
+app.use(cors({
+  origin: 'https://www.elejometa.com',
+  methods: ['GET','POST','OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
+// 对所有预检请求自动返回 204
+app.options('*', cors());
 // 日志目录
 const logDir = path.join(__dirname, 'logs');
 
