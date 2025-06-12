@@ -6,8 +6,6 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
 const tokenRoutes = require('./routes/tokenRoutes');
-const cors = require('cors');
-
 
 // 日志目录
 const logDir = path.join(__dirname, 'logs');
@@ -40,13 +38,7 @@ const credentials = { key: privateKey, cert: certificate };
 
 // 创建 Express 应用
 const app = express();
-app.use(cors({
-  origin: 'https://www.elejometa.com',
-  methods: ['GET','POST','OPTIONS'],
-  allowedHeaders: ['Content-Type']
-}));
-// 对所有预检请求自动返回 204
-app.options('*', cors());
+
 // 服务器配置
 app.use(helmet({
   contentSecurityPolicy: false, // 禁用内容安全策略，以便设置 CORS
