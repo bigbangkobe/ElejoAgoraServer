@@ -83,16 +83,25 @@ const xfWs = new WebSocketClient(targetUrl, {
 
 // 拦截 `/rtasr` 的 Upgrade 请求
 server.on('upgrade', (req, socket, head) => {
+  console.log('🔍 [upgrade] req.url =', req.url);
   if (req.url.startsWith('/rtasr')) {
+    console.log('✔️ 拦截到 /rtasr 升级请求');
     wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
   } else {
+    console.log('❌ 非 /rtasr 请求，直接销毁 socket');
     socket.destroy();
   }
 });
 
+
 // 启动 HTTPS + WS 服务
 server.listen(PORT, () => {
   console.log(`HTTPS & WS proxy running on https://localhost:${PORT}`);
+});
+
+server.on('clientError', (err, socket) => {
+  console.error('🛑 TLS/WS 握手失败：', err.message);
+  socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 });
 
 // 捕获未处理的 Promise 拒绝
