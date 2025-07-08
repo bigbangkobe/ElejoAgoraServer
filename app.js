@@ -12,7 +12,7 @@ const { WebSocketServer, WebSocket: WebSocketClient } = require('ws');
 const logDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
 
-// 配置日志记录器
+// 日志记录器
 const logger = winston.createLogger({
   transports: [
     new winston.transports.File({ filename: path.join(logDir, 'app.log'), level: 'error' }),
@@ -20,35 +20,18 @@ const logger = winston.createLogger({
   ],
 });
 
-// 读取 HTTPS 证书和私钥
+// 加载 SSL 证书和私钥
 const privateKey  = fs.readFileSync('naturich.top.key', 'utf8');
 const certificate = fs.readFileSync('naturich.top.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
-// 创建 Express 应用并配置中间件
-const app = express();
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
-app.use('/api/token', tokenRoutes);
-app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
-app.use((err, req, res, next) => {
-  logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
-  res.status(500).json({ error: 'Internal Server Error' });
-});
-
-// 创建 HTTPS Server 并挂载 Express
 const PORT = process.env.PORT || 3000;
-const server = https.createServer(credentials, app);
 
-// 将 WebSocket 绑定到 /rtasr 路径，自动处理 Upgrade
-const wss = new WebSocketServer({ server, path: '/rtasr' });
+// 1) 创建 HTTPS Server，不挂载 Express
+const server = https.createServer(credentials);
 
+// 2) noServer 模式的 WebSocketServer，只处理升级握手
+const wss = new WebSocketServer({ noServer: true });
 wss.on('connection', (clientWs, req) => {
   console.log('✔️ 客户端 /rtasr 握手成功，req.url =', req.url);
   const targetUrl = `wss://rtasr.xfyun.cn/v1/ws${req.url}`;
@@ -65,26 +48,41 @@ wss.on('connection', (clientWs, req) => {
   xfWs.on('error', cleanup);
 });
 
-// ↓↓↓ 3) 拦截所有 Upgrade 请求，优先处理 /rtasr
+// 3) 在 upgrade 事件中拦截 /rtasr 握手请求
 server.on('upgrade', (req, socket, head) => {
   console.log('🔍 [upgrade] req.url =', req.url);
   if (req.url.startsWith('/rtasr')) {
-    // 交给 wss 去做握手
-    wss.handleUpgrade(req, socket, head, ws => {
-      wss.emit('connection', ws, req);
-    });
+    wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
   } else {
-    // 非 /rtasr 的直接断开
     socket.destroy();
   }
 });
 
-// 启动服务
+// 4) 普通 HTTP 请求由 Express 处理
+const app = express();
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(express.json());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+app.use('/api/token', tokenRoutes);
+app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
+app.use((err, req, res, next) => {
+  logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+// 将 Express 绑定到 request 事件
+server.on('request', app);
+
+// 5) 启动监听
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`HTTPS & WS proxy listening on 0.0.0.0:${PORT}`);
 });
 
-// 捕获底层错误
+// 捕获底层 TLS/WS 错误
 server.on('clientError', (err, socket) => {
   console.error('🛑 TLS/WS 握手失败：', err.message);
   socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
