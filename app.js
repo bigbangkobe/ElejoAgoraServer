@@ -65,6 +65,20 @@ wss.on('connection', (clientWs, req) => {
   xfWs.on('error', cleanup);
 });
 
+// ↓↓↓ 3) 拦截所有 Upgrade 请求，优先处理 /rtasr
+server.on('upgrade', (req, socket, head) => {
+  console.log('🔍 [upgrade] req.url =', req.url);
+  if (req.url.startsWith('/rtasr')) {
+    // 交给 wss 去做握手
+    wss.handleUpgrade(req, socket, head, ws => {
+      wss.emit('connection', ws, req);
+    });
+  } else {
+    // 非 /rtasr 的直接断开
+    socket.destroy();
+  }
+});
+
 // 启动服务
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`HTTPS & WS proxy listening on 0.0.0.0:${PORT}`);
