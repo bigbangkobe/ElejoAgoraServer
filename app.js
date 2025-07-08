@@ -45,8 +45,20 @@ wss.on('connection', (clientWs, req) => {
   });
 
   // 双向消息转发
-  clientWs.on('message', msg => xfWs.send(msg));
-  xfWs.on('message', msg => clientWs.send(msg));
+   // 客户端 → 代理 → 讯飞
+  clientWs.on('message', msg => {
+    console.log('📥 收到客户端消息：', msg);
+    xfWs.send(msg);
+    console.log('📤 转发到讯飞：', msg);
+  });
+
+  // 讯飞 → 代理 → 客户端
+  xfWs.on('message', msg => {
+    console.log('📥 收到讯飞消息：', msg);
+    clientWs.send(msg);
+    console.log('📤 转发到客户端：', msg);
+  });
+
 
   // 任一端关闭时清理
   const cleanup = () => { clientWs.close(); xfWs.close(); };
